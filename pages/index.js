@@ -1,209 +1,140 @@
-import Head from 'next/head'
+import React from "react";
+import Head from "next/head";
+import Card from "@mui/material/Card";
+import Link from "next/link";
+import CardContent from "@mui/material/CardContent";
+import CardMedia from "@mui/material/CardMedia";
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import Typography from "@mui/material/Typography";
+import Grid from "@mui/material/Grid";
+import Paper from "@mui/material/Paper";
+import { styled } from "@mui/material/styles";
+import { connect } from "react-redux";
+import axios from "axios";
 
-export default function Home() {
+const Dashboard = () => {
+  const [currentList, setCurrentList] = React.useState(null);
+  const [limit, setLimit] = React.useState(20);
+  const [offset, setOffset] = React.useState(0);
+  const [number, setNumber] = React.useState(0);
+  const [loading, setLoading] = React.useState(false);
+  React.useEffect(() => {
+    if (!currentList || currentList.length > 20) {
+      getPokemonList(offset, limit);
+    }
+  }, [currentList]);
+
+  const getPokemonList = async (newOffset, newLimit) => {
+    setLoading(true);
+    setOffset(newOffset);
+    let data = await axios.get(
+      `https://pokeapi.co/api/v2/item?offset=${newOffset}&limit=${newLimit}`
+    );
+    if (data) {
+      if (newOffset === 0) {
+        setCurrentList(data.data.results);
+        setLoading(false);
+      } else {
+        let newArrList = currentList;
+        newArrList.push(...data.data.results);
+        setCurrentList(newArrList);
+        setLoading(false);
+      }
+    }
+  };
+
+  const Item = styled(Paper)(({ theme }) => ({
+    ...theme.typography.body2,
+    padding: theme.spacing(1),
+    textAlign: "center",
+    color: theme.palette.text.secondary,
+  }));
+
+  const onLoadMore = () => {
+    getPokemonList(offset + 20, 20);
+    setNumber(number + 1);
+  };
+
   return (
     <div className="container">
       <Head>
-        <title>Create Next App</title>
+        <title>Pokemon List</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
-      <main>
-        <h1 className="title">
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className="description">
-          Get started by editing <code>pages/index.js</code>
-        </p>
-
-        <div className="grid">
-          <a href="https://nextjs.org/docs" className="card">
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className="card">
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className="card"
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className="card"
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+      <div>
+        <div
+          style={{
+            display: "flex",
+            flex: 1,
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            marginBottom: 80,
+          }}
         >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className="logo" />
-        </a>
-      </footer>
-
-      <style jsx>{`
-        .container {
-          min-height: 100vh;
-          padding: 0 0.5rem;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-        }
-
-        main {
-          padding: 5rem 0;
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-        }
-
-        footer {
-          width: 100%;
-          height: 100px;
-          border-top: 1px solid #eaeaea;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-
-        footer img {
-          margin-left: 0.5rem;
-        }
-
-        footer a {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-
-        a {
-          color: inherit;
-          text-decoration: none;
-        }
-
-        .title a {
-          color: #0070f3;
-          text-decoration: none;
-        }
-
-        .title a:hover,
-        .title a:focus,
-        .title a:active {
-          text-decoration: underline;
-        }
-
-        .title {
-          margin: 0;
-          line-height: 1.15;
-          font-size: 4rem;
-        }
-
-        .title,
-        .description {
-          text-align: center;
-        }
-
-        .description {
-          line-height: 1.5;
-          font-size: 1.5rem;
-        }
-
-        code {
-          background: #fafafa;
-          border-radius: 5px;
-          padding: 0.75rem;
-          font-size: 1.1rem;
-          font-family: Menlo, Monaco, Lucida Console, Liberation Mono,
-            DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
-        }
-
-        .grid {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-wrap: wrap;
-
-          max-width: 800px;
-          margin-top: 3rem;
-        }
-
-        .card {
-          margin: 1rem;
-          flex-basis: 45%;
-          padding: 1.5rem;
-          text-align: left;
-          color: inherit;
-          text-decoration: none;
-          border: 1px solid #eaeaea;
-          border-radius: 10px;
-          transition: color 0.15s ease, border-color 0.15s ease;
-        }
-
-        .card:hover,
-        .card:focus,
-        .card:active {
-          color: #0070f3;
-          border-color: #0070f3;
-        }
-
-        .card h3 {
-          margin: 0 0 1rem 0;
-          font-size: 1.5rem;
-        }
-
-        .card p {
-          margin: 0;
-          font-size: 1.25rem;
-          line-height: 1.5;
-        }
-
-        .logo {
-          height: 1em;
-        }
-
-        @media (max-width: 600px) {
-          .grid {
-            width: 100%;
-            flex-direction: column;
-          }
-        }
-      `}</style>
-
-      <style jsx global>{`
-        html,
-        body {
-          padding: 0;
-          margin: 0;
-          font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
-            Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue,
-            sans-serif;
-        }
-
-        * {
-          box-sizing: border-box;
-        }
-      `}</style>
+          {currentList &&
+            currentList.map((item, index) => (
+              <Link href={`/detailPokemon?key=${item.url.split("/")[6]}`}>
+                <Grid item xs={3} md={3} lg={3} key={index}>
+                  <Item style={{ marginTop: 5 }}>
+                    {" "}
+                    <Card
+                      sx={{
+                        width: 150,
+                        height: 200,
+                        marginTop: 2,
+                        boxShadow: `0.1px 0.1px 1px black`,
+                      }}
+                    >
+                      <CardMedia
+                        component="img"
+                        height="auto"
+                        image={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${item.name}.png`}
+                        alt={item.name}
+                      />
+                      <CardContent>
+                        <Typography
+                          gutterBottom
+                          variant="h10"
+                          component="div"
+                          style={{ marginLeft: -3, textTransform: "uppercase" }}
+                        >
+                          {item.name}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Item>
+                </Grid>
+              </Link>
+            ))}
+          {loading ? (
+            <CircularProgress color="inherit" />
+          ) : (
+            <Button
+              style={{
+                backgroundColor: "grey",
+                width: 140,
+                height: 40,
+                color: "white",
+                marginTop: 15,
+              }}
+              onClick={() => onLoadMore()}
+            >
+              Load More
+            </Button>
+          )}
+        </div>
+      </div>
+      <style jsx>{``}</style>
     </div>
-  )
-}
+  );
+};
+
+const mapStateToProps = (state) => {
+  let { rootReducer } = state;
+  return {
+    ...rootReducer,
+  };
+};
+export default connect(mapStateToProps)(Dashboard);
